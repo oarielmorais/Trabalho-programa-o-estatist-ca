@@ -80,7 +80,7 @@ tabela['media_duracao'] = tabela['media_duracao'].round(1)
 print(tabela.to_string(index=False))
 
 # ------------------------------
-# 6. GRÁFICO 1 - Probabilidade de Ruína
+# 6. GRÁFICO - Probabilidade de Ruína
 # ------------------------------
 plt.figure(figsize=(8, 6))
 ax = plt.gca()
@@ -99,9 +99,65 @@ ax.set_xticks(CAPITAIS)
 plt.show()
 
 # ------------------------------
-# 7. GRÁFICO 2 - Duração Média do Jogo
+# 7. GRÁFICO - Duração Média do Jogo
 # ------------------------------
+import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+
+np.random.seed(42)  # Fixando semente para reprodutibilidade
+
+def simular_jogo(capital_inicial, meta, prob_ganhar):
+    """Simula uma trajetória do jogo até ruína ou sucesso"""
+    capital = capital_inicial
+    tempo = 0
+
+    while capital > 0 and capital < meta:
+        capital += 1 if np.random.random() < prob_ganhar else -1
+        tempo += 1
+
+    return "ruína" if capital == 0 else "sucesso", tempo
+
+# Da célula 2fOVKqZVRpwS: Definição dos parâmetros
+META = 50
+REPLICACOES = 10000
+CAPITAIS = [5, 10, 25, 45]
+PROBABILIDADES = [0.5, 0.49]
+
+# Da célula 7_K0V3z2T_dn: Execução dos experimentos e coleta de resultados
+resultados = []
+
+for capital in CAPITAIS:
+    for p in PROBABILIDADES:
+        ruinass = 0
+        duracoes = []
+
+        for _ in range(REPLICACOES):
+            resultado, duracao = simular_jogo(capital, META, p)
+            if resultado == "ruína":
+                ruinass += 1
+            duracoes.append(duracao)
+
+        prob_ruina = ruinass / REPLICACOES
+        media_duracao = np.mean(duracoes)
+        dp_duracao = np.std(duracoes)
+
+        resultados.append({
+            'capital': capital,
+            'prob_ganhar': p,
+            'tipo': 'Justo' if p == 0.5 else 'Viés 1%',
+            'prob_ruina': prob_ruina,
+            'media_duracao': media_duracao,
+            'dp_duracao': dp_duracao
+        })
+
+# Da célula PXnRQa8hU8Nc: Criação do DataFrame df
+df = pd.DataFrame(resultados)
+# --- Fim do código de dependência ---
+
+# GRÁFICO : Duração Média
 plt.figure(figsize=(10, 8))
+# Use plt.plot() em vez de ax2.plot()
 for tipo in ['Justo', 'Viés 1%']:
     dados = df[df['tipo'] == tipo]
     plt.plot(dados['capital'], dados['media_duracao'], 's-', label=tipo, markersize=8)
@@ -115,9 +171,8 @@ plt.xticks(CAPITAIS)
 
 plt.tight_layout()
 plt.show()
-
 # ------------------------------
-# 8. GRÁFICO 3 - Impacto do Viés de 1%
+# 8. GRÁFICO - Impacto do Viés de 1%
 # ------------------------------
 plt.figure(figsize=(8, 6))
 ax = plt.gca()
@@ -149,7 +204,7 @@ for bar, impacto in zip(bars, impactos):
 plt.show()
 
 # ------------------------------
-# 9. GRÁFICO 4 - Trajetórias Exemplares
+# 9. GRÁFICO - Trajetórias Exemplares
 # ------------------------------
 plt.figure(figsize=(8, 6))
 ax = plt.gca()
